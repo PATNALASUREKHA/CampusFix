@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:homescreeen/providers/auth_login.dart';
+import 'package:homescreeen/providers/change_password.dart';
+import 'package:homescreeen/providers/profile.dart';
+import 'package:homescreeen/providers/theme_provider.dart';
 import 'package:homescreeen/screens/login.dart/sign_in.dart';
 import 'package:provider/provider.dart';
 import 'package:device_preview/device_preview.dart';
-
 import 'package:homescreeen/providers/block_provider.dart';
-
-import 'package:homescreeen/screens/student/student_home_screen.dart'; // Later navigation
+// Later navigation
 
 void main() {
   runApp(
@@ -16,6 +17,9 @@ void main() {
         providers: [
           ChangeNotifierProvider(create: (_) => AuthProvider()),
           ChangeNotifierProvider(create: (_) => BlockProvider()),
+          ChangeNotifierProvider(create: (_) => ProfileProvider()),
+          ChangeNotifierProvider(create: (_) => ThemeProvider()),
+          ChangeNotifierProvider(create: (_) => ChangePasswordProvider()),
         ],
         child: const MyApp(),
       ),

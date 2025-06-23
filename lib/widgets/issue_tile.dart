@@ -9,7 +9,7 @@ class IssueTile extends StatelessWidget {
   final Issue issue;
   final int index;
 
-  IssueTile({
+  const IssueTile({super.key, 
     required this.blockName,
     required this.category,
     required this.issue,
@@ -19,19 +19,19 @@ class IssueTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: EdgeInsets.all(10),
+      margin: const EdgeInsets.all(10),
       color: issue.status == 'Solved' ? Colors.green[100] : Colors.red[100],
       child: Padding(
-        padding: EdgeInsets.all(12),
+        padding: const EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Room: ${issue.roomNumber}'),
             Text('Floor: ${issue.floor}'),
             Text('Issue: ${issue.shortDescription}'),
-            SizedBox(height: 5),
+            const SizedBox(height: 5),
             ExpansionTile(
-              title: Text("View Details"),
+              title: const Text("View Details"),
               children: [
                 Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -48,16 +48,16 @@ class IssueTile extends StatelessWidget {
                         .updateIssueStatus(
                             blockName, category, index, 'Solved');
                   },
-                  child: Text('Solved'),
+                  child: const Text('Solved'),
                 ),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 OutlinedButton(
                   onPressed: () {
                     Provider.of<BlockProvider>(context, listen: false)
                         .updateIssueStatus(
                             blockName, category, index, 'Pending');
                   },
-                  child: Text('Pending'),
+                  child: const Text('Pending'),
                 ),
               ],
             )

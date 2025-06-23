@@ -51,7 +51,7 @@ class _SignInState extends State<SignIn> {
         } else {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (_) => StudentHomeScreen()),
+            MaterialPageRoute(builder: (_) => const StudentHomeScreen()),
           );
         }
       } else {

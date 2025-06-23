@@ -5,6 +5,8 @@ import '../providers/block_provider.dart';
 import 'block_detail_screen.dart';
 
 class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
+
   String getGreeting() {
     final hour = DateTime.now().hour;
     if (hour < 12) return 'Good Morning';

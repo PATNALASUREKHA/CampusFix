@@ -7,7 +7,7 @@ import '../widgets/issue_tile.dart';
 class BlockDetailScreen extends StatelessWidget {
   final Block block;
 
-  BlockDetailScreen({required this.block});
+  const BlockDetailScreen({super.key, required this.block});
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +40,7 @@ class IssueTab extends StatelessWidget {
   final String category;
   final String blockName;
 
-  IssueTab({required this.category, required this.blockName});
+  const IssueTab({super.key, required this.category, required this.blockName});
 
   @override
   Widget build(BuildContext context) {
