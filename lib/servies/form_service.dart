@@ -10,7 +10,7 @@ class ApiService {
     required String rollNo,
     required String blockNo,
     required String roomNo,
-    File? image,
+    required String? path,
   }) async {
     try {
       final uri = Uri.parse('http://54.177.10.216:5000/api/addcomplaint');
@@ -22,10 +22,12 @@ class ApiService {
         ..fields['hostel_block'] = blockNo
         ..fields['room_no'] = roomNo;
       debugPrint(request.fields.toString());
-      if (image != null) {
-        debugPrint('image null');
-        request.files
-            .add(await http.MultipartFile.fromPath('image', image.path));
+      if (path != null) {
+        debugPrint('image is not null');
+        request.files.add(await http.MultipartFile.fromPath('image', path));
+        print('Image added');
+      } else {
+        debugPrint('image is null');
       }
 
       final streamedResponse = await request.send();

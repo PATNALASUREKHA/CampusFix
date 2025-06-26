@@ -37,12 +37,11 @@ class _SignInState extends State<SignIn> {
       final rollNo = _rollNoController.text.trim();
       final password = _passwordController.text.trim();
 
-      //final success = await LoginService.loginUser(rollNo, password);
+      final userData = await LoginService.loginUser(rollNo, password);
 
       setState(() => _isLoading = false);
-      final userData = await LoginService.loginUser(rollNo, password);
+
       if (userData != null) {
-        //sucess
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('name', userData['name'] ?? '');
         await prefs.setString('rollNo', userData['roll_no'] ?? '');
@@ -76,16 +75,20 @@ class _SignInState extends State<SignIn> {
 
   @override
   Widget build(BuildContext context) {
+    const Color primaryColor = Color(0xFFC562AF); // Pinkish purple
+    const Color secondaryColor = Color(0xFFFEC5F6); // Light pastel pink
+    const Color darkText = Color(0xFF3D3D3D);
+
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: secondaryColor,
       body: Column(
         children: [
-          // Top Lottie section with rounded bottom
+          /// Top Section with Animation
           Container(
             height: 260,
             width: double.infinity,
             decoration: const BoxDecoration(
-              color: Colors.white,
+              color: Color(0xFFDB8DD0),
               borderRadius: BorderRadius.only(
                 bottomLeft: Radius.circular(40),
                 bottomRight: Radius.circular(40),
@@ -93,8 +96,8 @@ class _SignInState extends State<SignIn> {
               boxShadow: [
                 BoxShadow(
                   color: Colors.black12,
-                  blurRadius: 4,
-                  offset: Offset(0, 2),
+                  blurRadius: 6,
+                  offset: Offset(0, 3),
                 ),
               ],
             ),
@@ -102,35 +105,42 @@ class _SignInState extends State<SignIn> {
               child: Lottie.asset(
                 'assets/login_animation.json',
                 height: 200,
-                fit: BoxFit.contain,
               ),
             ),
           ),
 
-          // Login form
+          /// Login Form Section
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
               child: Form(
                 key: _formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      'Log-in',
+                      'Welcome',
                       style: TextStyle(
                         fontSize: 26,
                         fontWeight: FontWeight.bold,
+                        color: darkText,
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Please login in to continue',
+                      style: TextStyle(fontSize: 16, color: Colors.black54),
+                    ),
+                    const SizedBox(height: 24),
+
+                    /// Roll Number Field
                     TextFormField(
                       controller: _rollNoController,
                       decoration: InputDecoration(
-                        labelText: 'Email',
-                        hintText: 'Your email id',
+                        labelText: 'Roll Number',
                         filled: true,
                         fillColor: Colors.white,
+                        prefixIcon: const Icon(Icons.person),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -138,14 +148,16 @@ class _SignInState extends State<SignIn> {
                       validator: _validateRollNo,
                     ),
                     const SizedBox(height: 16),
+
+                    /// Password Field
                     TextFormField(
                       controller: _passwordController,
                       obscureText: _obscureText,
                       decoration: InputDecoration(
                         labelText: 'Password',
-                        hintText: 'Password',
                         filled: true,
                         fillColor: Colors.white,
+                        prefixIcon: const Icon(Icons.lock),
                         suffixIcon: IconButton(
                           icon: Icon(
                             _obscureText
@@ -161,7 +173,8 @@ class _SignInState extends State<SignIn> {
                       ),
                       validator: _validatePassword,
                     ),
-                    const SizedBox(height: 10),
+
+                    /// Forgot Password
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
@@ -175,20 +188,23 @@ class _SignInState extends State<SignIn> {
                         },
                         child: const Text(
                           'Forgot password?',
-                          style: TextStyle(color: Colors.grey),
+                          style: TextStyle(color: Colors.black54),
                         ),
                       ),
                     ),
                     const SizedBox(height: 10),
+
+                    /// Login Button
                     SizedBox(
                       width: double.infinity,
                       height: 50,
                       child: ElevatedButton(
                         onPressed: _isLoading ? null : _signIn,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black87,
+                          backgroundColor: primaryColor,
+                          foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(12),
                           ),
                         ),
                         child: _isLoading
@@ -197,7 +213,10 @@ class _SignInState extends State<SignIn> {
                               )
                             : const Text(
                                 'Login',
-                                style: TextStyle(color: Colors.white),
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
                               ),
                       ),
                     ),
