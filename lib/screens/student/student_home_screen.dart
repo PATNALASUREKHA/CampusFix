@@ -1,10 +1,13 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:homescreeen/servies/form_service.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:provider/provider.dart';
-import '../../providers/issue_provider.dart';
-import 'profile_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'notify_page.dart';
+import 'profile_page.dart';
+import 'dart:typed_data';
 
 class StudentHomeScreen extends StatefulWidget {
   const StudentHomeScreen({super.key});
@@ -14,161 +17,10 @@ class StudentHomeScreen extends StatefulWidget {
 }
 
 class _StudentHomeScreenState extends State<StudentHomeScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final TextEditingController roomController = TextEditingController();
-  final TextEditingController descriptionController = TextEditingController();
-  final List<String> categories = [
-    'Electricity',
-    'Plumber',
-    'Food',
-    'Furniture',
-    'WiFi',
-    'Other'
-  ];
-  String? selectedCategory;
-  File? _pickedImage;
-
   int _selectedIndex = 0;
 
-  String getGreeting() {
-    final hour = DateTime.now().hour;
-    if (hour < 12) return 'Good Morning';
-    if (hour < 17) return 'Good Afternoon';
-    return 'Good Evening';
-  }
-
-  Future<void> _pickImage() async {
-    final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (picked != null) {
-      setState(() {
-        _pickedImage = File(picked.path);
-      });
-    }
-  }
-
   Widget _buildHomePage(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.only(top: 60, bottom: 100),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Text(
-              getGreeting(),
-              style: const TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-          ),
-          const SizedBox(height: 30),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: const Color(0xFF2E1A64),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    DropdownButtonFormField<String>(
-                      dropdownColor: Colors.deepPurple,
-                      value: selectedCategory,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: const InputDecoration(
-                        labelText: 'Category',
-                        labelStyle: TextStyle(color: Colors.white70),
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white38),
-                        ),
-                      ),
-                      items: categories.map((category) {
-                        return DropdownMenuItem(
-                          value: category,
-                          child: Text(category,
-                              style: const TextStyle(color: Colors.white)),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          selectedCategory = value;
-                        });
-                      },
-                      validator: (val) =>
-                          val == null ? 'Please select a category' : null,
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: descriptionController,
-                      maxLines: 3,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: const InputDecoration(
-                        labelText: 'Problem Description',
-                        labelStyle: TextStyle(color: Colors.white70),
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white38),
-                        ),
-                      ),
-                      validator: (val) => val!.length < 10
-                          ? 'Please enter at least 10 characters'
-                          : null,
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        ElevatedButton.icon(
-                          onPressed: _pickImage,
-                          icon: const Icon(Icons.upload_file),
-                          label: const Text('Upload Image'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.pinkAccent,
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        _pickedImage != null
-                            ? const Text("✅ Image selected",
-                                style: TextStyle(color: Colors.white70))
-                            : const Text("No image selected",
-                                style: TextStyle(color: Colors.white70)),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-                    ElevatedButton(
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          Provider.of<IssueProvider>(context, listen: false)
-                              .submitIssue(
-                            // Replace with actual selected block if needed
-                            roomNumber: roomController.text.trim(),
-
-                            description: descriptionController.text.trim(),
-                          );
-
-                          roomController.clear();
-                          descriptionController.clear();
-                          selectedCategory = null;
-                          setState(() => _pickedImage = null);
-
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('✅ Issue Submitted')),
-                          );
-                        }
-                      },
-                      child: const Text('Submit'),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+    return const IssueFormScreen();
   }
 
   @override
@@ -177,7 +29,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
     if (_selectedIndex == 0) {
       currentScreen = _buildHomePage(context);
     } else if (_selectedIndex == 1) {
-      currentScreen = const NotificationPage();
+      currentScreen = NotificationPage();
     } else {
       currentScreen = const ProfileScreen();
     }
@@ -248,6 +100,287 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class IssueFormScreen extends StatefulWidget {
+  const IssueFormScreen({super.key});
+
+  @override
+  _IssueFormScreenState createState() => _IssueFormScreenState();
+}
+
+class _IssueFormScreenState extends State<IssueFormScreen> {
+  final _formKey = GlobalKey<FormState>();
+  String? category, description;
+  String rollNo = '';
+  String blockNo = '';
+  String roomNo = '';
+  File? _imageFile;
+  Uint8List? _webImageData;
+
+  final categories = [
+    'Electricity',
+    'Plumbing',
+    'Wi-Fi',
+    'Furniture',
+    'Food',
+    'Other'
+  ];
+  Key _dropdownKey = UniqueKey();
+  @override
+  void initState() {
+    super.initState();
+    loadStudentInfo();
+  }
+
+  Future<void> loadStudentInfo() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      rollNo = prefs.getString('rollNo') ?? '';
+      blockNo = prefs.getString('blockNo') ?? '';
+      roomNo = prefs.getString('roomNo') ?? '';
+    });
+  }
+
+  Future<void> pickImage() async {
+    final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
+
+    if (picked != null) {
+      if (kIsWeb) {
+        final bytes = await picked.readAsBytes();
+        setState(() {
+          _webImageData = bytes;
+          _imageFile = null;
+        });
+      } else {
+        setState(() {
+          _imageFile = File(picked.path);
+          _webImageData = null;
+        });
+      }
+    }
+  }
+
+  void submitForm() async {
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+
+      // Show loading dialog
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => const Center(child: CircularProgressIndicator()),
+      );
+
+      try {
+        final responseData = await ApiService.addComplaint(
+          category: category!,
+          description: description!,
+          rollNo: rollNo,
+          blockNo: blockNo,
+          roomNo: roomNo,
+          image: _imageFile,
+        );
+
+        Navigator.of(context).pop(); // Close loading
+
+        if (responseData != null && responseData['status'] == true) {
+          _formKey.currentState!.reset();
+          setState(() {
+            category = null;
+            description = null;
+            _imageFile = null;
+            _webImageData = null;
+            _dropdownKey = UniqueKey();
+          });
+
+          showDialog(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              title: const Text("Success"),
+              content: Text(
+                  responseData['message'] ?? "Issue submitted successfully!"),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  child: const Text("OK"),
+                ),
+              ],
+            ),
+          );
+        } else {
+          // Handle failure
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content:
+                  Text(responseData?['message'] ?? "Failed to submit issue"),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } catch (e) {
+        Navigator.of(context).pop(); // Close loading
+        print("Submit Error: $e");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text("Something went wrong. Please try again")),
+        );
+      }
+    }
+  }
+
+  InputDecoration _inputDecoration(String label, IconData icon) {
+    return InputDecoration(
+      labelText: label,
+      prefixIcon: Icon(icon, color: Colors.deepPurple),
+      filled: true,
+      fillColor: Colors.white,
+      labelStyle: TextStyle(color: Colors.grey[800]),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Colors.deepPurple),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Colors.deepPurple, width: 2),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isSmallScreen = MediaQuery.of(context).size.width < 600;
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFF4F2FF),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            padding: EdgeInsets.symmetric(
+              horizontal: isSmallScreen ? 12 : 32,
+              vertical: isSmallScreen ? 12 : 24,
+            ),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 600),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE5D9F2),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.deepPurple.shade100),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.deepPurple.withOpacity(0.1),
+                        blurRadius: 10,
+                        offset: const Offset(0, 5),
+                      )
+                    ],
+                  ),
+                  padding: EdgeInsets.all(isSmallScreen ? 16 : 24),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Center(
+                          child: Text(
+                            "CampusFix - Issue Form",
+                            style: TextStyle(
+                              fontSize: isSmallScreen ? 20 : 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.deepPurple,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        DropdownButtonFormField<String>(
+                          key: _dropdownKey,
+                          decoration:
+                              _inputDecoration("Issue Category", Icons.report),
+                          value: category,
+                          onChanged: (val) => setState(() => category = val),
+                          items: categories
+                              .map((cat) => DropdownMenuItem(
+                                  value: cat, child: Text(cat)))
+                              .toList(),
+                          validator: (val) =>
+                              val == null ? "Select category" : null,
+                          style: const TextStyle(color: Colors.black87),
+                        ),
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          decoration: _inputDecoration(
+                              "Describe the Issue", Icons.description),
+                          maxLines: 4,
+                          validator: (val) => val!.length < 10
+                              ? "Describe at least 10 characters"
+                              : null,
+                          onSaved: (val) => description = val,
+                          style: const TextStyle(color: Colors.black87),
+                        ),
+                        const SizedBox(height: 12),
+                        ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.deepPurple,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10)),
+                          ),
+                          icon: const Icon(Icons.image, color: Colors.white),
+                          label: const Text("Upload Image",
+                              style: TextStyle(color: Colors.white)),
+                          onPressed: pickImage,
+                        ),
+                        if (_imageFile != null || _webImageData != null) ...[
+                          const SizedBox(height: 12),
+                          Card(
+                            elevation: 4,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: kIsWeb
+                                  ? (_webImageData != null
+                                      ? Image.memory(_webImageData!,
+                                          height: 160)
+                                      : const Text("No image selected"))
+                                  : (_imageFile != null
+                                      ? Image.file(_imageFile!, height: 160)
+                                      : const Text("No image selected")),
+                            ),
+                          ),
+                        ],
+                        const SizedBox(height: 20),
+                        Center(
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.deepPurple,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 40, vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                            ),
+                            onPressed: submitForm,
+                            child: const Text(
+                              "Submit",
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white),
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
