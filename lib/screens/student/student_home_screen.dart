@@ -9,7 +9,6 @@ import 'package:homescreeen/servies/form_service.dart';
 import 'notify_page.dart';
 import 'profile_page.dart';
 
-// Create this model class in models/issue_model.dart
 class IssueModel {
   final String category;
   final String description;
@@ -36,7 +35,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
   void _onIssueSubmitted(IssueModel issue) {
     setState(() {
       _submittedIssue = issue;
-      _selectedIndex = 2; // Go to Profile after submission
+      _selectedIndex = 2;
     });
   }
 
@@ -90,7 +89,6 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
   }
 }
 
-// Form Screen with callback
 class IssueFormScreen extends StatefulWidget {
   final Function(IssueModel) onSubmit;
 
@@ -105,7 +103,6 @@ class _IssueFormScreenState extends State<IssueFormScreen> {
   String? category, description;
   String rollNo = '', blockNo = '', roomNo = '';
   File? _imageFile;
-  String? _base64Image;
   Uint8List? _webImageData;
   Key _dropdownKey = UniqueKey();
 
@@ -159,6 +156,34 @@ class _IssueFormScreenState extends State<IssueFormScreen> {
     }
   }
 
+  void _showTopMessage(String message, {Color backgroundColor = Colors.green}) {
+    final overlay = Overlay.of(context);
+    final entry = OverlayEntry(
+      builder: (context) => Positioned(
+        top: 0,
+        left: 0,
+        right: 0,
+        child: Material(
+          elevation: 10,
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+            color: backgroundColor,
+            child: SafeArea(
+              child: Text(
+                message,
+                style: const TextStyle(color: Colors.white, fontSize: 16),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    overlay.insert(entry);
+    Future.delayed(const Duration(seconds: 3), () => entry.remove());
+  }
+
   void submitForm() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
@@ -195,38 +220,21 @@ class _IssueFormScreenState extends State<IssueFormScreen> {
             category = null;
             description = null;
             _imageFile = null;
-            _base64Image = null;
             _dropdownKey = UniqueKey();
           });
 
-          showDialog(
-            context: context,
-            builder: (ctx) => AlertDialog(
-              title: const Text("Success"),
-              content: Text(
-                  responseData['message'] ?? "Issue submitted successfully!"),
-              actions: [
-                TextButton(
-                    onPressed: () => Navigator.of(ctx).pop(),
-                    child: const Text("OK"))
-              ],
-            ),
-          );
+          _showTopMessage("Issue submitted successfully!",
+              backgroundColor: Colors.green);
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content:
-                  Text(responseData?['message'] ?? "Failed to submit issue"),
-              backgroundColor: Colors.red,
-            ),
+          _showTopMessage(
+            responseData?['message'] ?? "Failed to submit issue",
+            backgroundColor: Colors.red,
           );
         }
       } catch (e) {
         Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text("Something went wrong. Please try again")),
-        );
+        _showTopMessage("Something went wrong. Please try again",
+            backgroundColor: Colors.red);
       }
     }
   }

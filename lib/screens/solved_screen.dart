@@ -13,8 +13,9 @@ class SolvedScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Solved Issues"),
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: Color.fromARGB(255, 247, 164, 240),
       ),
+      backgroundColor: Color.fromARGB(255, 247, 164, 240),
       body: solvedIssues.isEmpty
           ? const Center(
               child: Text(

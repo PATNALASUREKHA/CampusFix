@@ -32,11 +32,6 @@ class History extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      appBar: AppBar(
-        title: const Text('Complaint History'),
-        backgroundColor: Colors.deepPurpleAccent,
-        foregroundColor: Colors.white,
-      ),
       body: hasComplaint
           ? ListView(
               padding: const EdgeInsets.all(16),

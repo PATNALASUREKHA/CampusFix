@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:homescreeen/providers/change_password.dart';
 import 'package:homescreeen/providers/profile.dart';
 import 'package:homescreeen/providers/theme_provider.dart';
-import 'package:homescreeen/screens/login/sign_in.dart';
+import 'package:homescreeen/screens/onboarding_screen.dart';
 import 'package:homescreeen/servies/student_service.dart';
 import 'package:provider/provider.dart';
 import 'package:device_preview/device_preview.dart';
@@ -41,7 +41,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.deepPurple,
       ),
-      home: const SignIn(), // Starting screen
+      home: const OnboardingScreen(), // Starting screen
     );
   }
 }
