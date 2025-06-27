@@ -88,7 +88,7 @@ class NotificationTile extends StatelessWidget {
         child: Container(
           margin: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.2),
+            color: Color.fromARGB(255, 212, 105, 141).withOpacity(0.2),
             borderRadius: BorderRadius.circular(18),
             border: Border.all(color: Colors.white30),
             boxShadow: [

@@ -109,8 +109,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       /// Info Card
                       Container(
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.85),
+                          color: Colors.white.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: Color.fromARGB(255, 215, 64, 115)
+                                .withOpacity(0.85),
+                          ),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black12,
@@ -133,27 +137,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                       const SizedBox(height: 20),
 
-                      /// History Button
+                      /// History Button (Large)
                       SizedBox(
-                        width: double.infinity,
-                        height: 48,
+                        width: 200,
+                        height: 50,
                         child: ElevatedButton(
                           onPressed: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (_) => History(
-                                    category: category,
-                                    description: description,
-                                    imageData: image),
+                                  category: category,
+                                  description: description,
+                                  imageData: image,
+                                ),
                               ),
                             );
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.deepPurpleAccent,
+                            backgroundColor: const Color(0xFFDB8DD0),
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(20),
                             ),
                           ),
                           child: const Text(
@@ -166,9 +171,65 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                       const SizedBox(height: 16),
 
-                      _actionButton("Change Password", const Color(0xFFDB8DD0)),
+                      /// Change Password Button (Medium)
+                      SizedBox(
+                        width: 200,
+                        height: 44,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFDB8DD0),
+                            foregroundColor: Colors.white,
+                            elevation: 4,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                          onPressed: () {
+                            showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              backgroundColor: Colors.transparent,
+                              builder: (_) => ForgotPasswordModal(),
+                            );
+                          },
+                          child: const Text(
+                            "Change Password",
+                            style: TextStyle(
+                                fontSize: 15, fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ),
+
                       const SizedBox(height: 16),
-                      _actionButton("Logout", Colors.redAccent),
+
+                      /// Logout Button (Small)
+                      SizedBox(
+                        width: 130,
+                        height: 40,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.redAccent,
+                            foregroundColor: Colors.white,
+                            elevation: 4,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          onPressed: () {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const SignIn(),
+                              ),
+                            );
+                          },
+                          child: const Text(
+                            "Logout",
+                            style: TextStyle(
+                                fontSize: 14, fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ),
 
                       const SizedBox(height: 30),
                     ],
@@ -202,42 +263,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _actionButton(String text, Color color) {
-    return SizedBox(
-      width: double.infinity,
-      height: 48,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: color,
-          foregroundColor: Colors.white,
-          elevation: 4,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-        onPressed: () {
-          if (text == "Logout") {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => const SignIn()),
-            );
-          } else if (text == "Change Password") {
-            showModalBottomSheet(
-              context: context,
-              isScrollControlled: true,
-              backgroundColor: Colors.transparent,
-              builder: (_) => ForgotPasswordModal(),
-            );
-          }
-        },
-        child: Text(
-          text,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
       ),
     );
   }

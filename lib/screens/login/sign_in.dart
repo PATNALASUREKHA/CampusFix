@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:homescreeen/screens/home_screen.dart';
+import 'package:homescreeen/screens/home_screen.dart'; // Admin Screen
 import 'package:homescreeen/screens/login/forgot_password.dart';
 import 'package:homescreeen/servies/auth_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -14,14 +14,15 @@ class SignIn extends StatefulWidget {
 }
 
 class _SignInState extends State<SignIn> {
-  final TextEditingController _rollNoController = TextEditingController();
+  final TextEditingController _idController =
+      TextEditingController(); // ID (admin/student)
   final TextEditingController _passwordController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _obscureText = true;
   bool _isLoading = false;
 
-  String? _validateRollNo(String? value) {
-    if (value == null || value.isEmpty) return 'Please enter your roll number';
+  String? _validateId(String? value) {
+    if (value == null || value.isEmpty) return 'Please enter your ID';
     return null;
   }
 
@@ -34,40 +35,51 @@ class _SignInState extends State<SignIn> {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
 
-      final rollNo = _rollNoController.text.trim();
+      final id = _idController.text.trim();
       final password = _passwordController.text.trim();
 
-      final userData = await LoginService.loginUser(rollNo, password);
+      Map<String, dynamic>? userData;
+
+      if (id.toUpperCase().startsWith('EMP')) {
+        // Admin login
+        userData = await LoginService.loginAdmin(id, password);
+      } else {
+        // Student login
+        userData = await LoginService.loginUser(id, password);
+      }
 
       setState(() => _isLoading = false);
 
       if (userData != null) {
         final prefs = await SharedPreferences.getInstance();
+
         await prefs.setString('name', userData['name'] ?? '');
-        await prefs.setString('rollNo', userData['roll_no'] ?? '');
-        await prefs.setString('blockNo', userData['hostel_block'] ?? '');
-        await prefs.setString('roomNo', userData['room_no'] ?? '');
         await prefs.setString('mobileNo', userData['mobile'].toString());
         await prefs.setString('profileImage', userData['profile_image'] ?? '');
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Login successful')),
-        );
-
-        if (rollNo == 'admin') {
+        if (id.toUpperCase().startsWith('EMP')) {
+          await prefs.setString('adminId', userData['id'] ?? '');
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (_) => HomeScreen()),
+            MaterialPageRoute(
+                builder: (_) => const HomeScreen()), // Admin screen
           );
         } else {
+          await prefs.setString('rollNo', userData['roll_no'] ?? '');
+          await prefs.setString('blockNo', userData['hostel_block'] ?? '');
+          await prefs.setString('roomNo', userData['room_no'] ?? '');
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (_) => const StudentHomeScreen()),
           );
         }
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Login successful')),
+        );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Invalid roll number or password')),
+          const SnackBar(content: Text('Invalid ID or password')),
         );
       }
     }
@@ -75,15 +87,15 @@ class _SignInState extends State<SignIn> {
 
   @override
   Widget build(BuildContext context) {
-    const Color primaryColor = Color(0xFFC562AF); // Pinkish purple
-    const Color secondaryColor = Color(0xFFFEC5F6); // Light pastel pink
+    const Color primaryColor = Color(0xFFC562AF);
+    const Color secondaryColor = Color(0xFFFEC5F6);
     const Color darkText = Color(0xFF3D3D3D);
 
     return Scaffold(
       backgroundColor: secondaryColor,
       body: Column(
         children: [
-          /// Top Section with Animation
+          /// Header with Animation
           Container(
             height: 260,
             width: double.infinity,
@@ -128,16 +140,16 @@ class _SignInState extends State<SignIn> {
                     ),
                     const SizedBox(height: 8),
                     const Text(
-                      'Please login in to continue',
+                      'Please login to continue',
                       style: TextStyle(fontSize: 16, color: Colors.black54),
                     ),
                     const SizedBox(height: 24),
 
-                    /// Roll Number Field
+                    /// ID Field
                     TextFormField(
-                      controller: _rollNoController,
+                      controller: _idController,
                       decoration: InputDecoration(
-                        labelText: 'Roll Number',
+                        labelText: 'ID (Roll No / Admin ID)',
                         filled: true,
                         fillColor: Colors.white,
                         prefixIcon: const Icon(Icons.person),
@@ -145,7 +157,7 @@ class _SignInState extends State<SignIn> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      validator: _validateRollNo,
+                      validator: _validateId,
                     ),
                     const SizedBox(height: 16),
 
