@@ -9,27 +9,20 @@ class BlockProvider with ChangeNotifier {
   List<Block> get blocks => _blocks;
 
   Future<void> fetchBlocksWithComplaints() async {
-    final url = Uri.parse('http://54.177.10.216:5000/api/complaints/count');
+    final url = Uri.parse(
+        'http://54.177.10.216:5000/api/complaints/count'); // Replace with your API
+
     try {
       final response = await http.get(url);
-
       if (response.statusCode == 200) {
-        final extractedData = json.decode(response.body);
-        final List<dynamic> blockData = extractedData['data'];
-
-        _blocks = blockData.map((b) => Block.fromJson(b)).toList();
+        final List<dynamic> data = json.decode(response.body);
+        _blocks = data.map((json) => Block.fromJson(json)).toList();
         notifyListeners();
       } else {
         throw Exception('Failed to load blocks');
       }
-    } catch (error) {
-      print('Error fetching blocks: $error');
-      rethrow;
+    } catch (e) {
+      print('Error fetching blocks: $e');
     }
   }
-
-  getAllSolvedIssues() {}
-
-  void updateIssueStatus(
-      String blockName, String category, int index, String s) {}
 }
