@@ -8,32 +8,29 @@ class CategoryCountProvider with ChangeNotifier {
 
   List<CategoryCount> get counts => _counts;
 
-  Future<void> fetchCategoryCounts(String block) async {
-    final url =
-        Uri.parse('http://54.177.10.216:5000/api/complaints/category/count');
+  Future<Map<String, int>> fetchCategoryCounts(String blockId) async {
+    final response = await http.post(
+      Uri.parse("http://54.177.10.216:5000/api/complaints/category/count"),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({"block": blockId}),
+    );
 
-    try {
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({'block': block}),
-      );
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data = jsonDecode(response.body);
 
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body) as List;
-        _counts = data.map((item) => CategoryCount.fromJson(item)).toList();
-        notifyListeners();
-      } else {
-        throw Exception('Failed to fetch category counts');
-      }
-    } catch (e) {
-      print('Error: $e');
+      // Remove the message
+      data.remove("message");
+
+      // Convert list of complaints to their count
+      return data.map((key, value) => MapEntry(key, (value as List).length));
+    } else {
+      throw Exception("Failed to load category counts");
     }
   }
 
   int getCountByCategory(String category) {
     return _counts
-        .firstWhere((c) => c.category.toLowerCase() == category.toLowerCase(),
+        .firstWhere((c) => c.category.toLowerCase() == category.toUpperCase(),
             orElse: () => CategoryCount(category: category, count: 0))
         .count;
   }
